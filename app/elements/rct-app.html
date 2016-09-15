@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="../bower_components/polymer/polymer.html" rel="import">
+    <!-- Element Imports -->
+    <!--<link rel="import" href="../styles/app-theme.html">-->
+    <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+    <link rel="import" href="../bower_components/paper-toolbar/paper-toolbar.html">
+    <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+    <link rel="import" href="../bower_components/paper-button/paper-button.html">
+    <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+</head>
+
+<dom-module id="rct-app">
+    <style is="custom-style" include="iron-flex iron-flex-alignment"></style>
+    <style>
+        /* CSS rules for your element */
+        .rct-button-container {
+            margin: 13px;
+        }
+
+        .rct-button-container> paper-button{
+            width: 100%;
+        }
+
+        paper-button.indigo {
+            background-color: var(--paper-indigo-500);
+            color: white;
+            /*--paper-button-raised-keyboard-focus: {*/
+            /*background-color: var(--paper-pink-a200) !important;*/
+            /*color: white !important;*/
+            /*};*/
+        }
+
+        paper-button:focus {
+            background-color: default;
+            color: default;
+            font-weight: normal;;
+        }
+    </style>
+    <template>
+        <!-- local DOM for your element -->
+        <paper-toolbar>
+            <!--<paper-icon-button icon="menu"></paper-icon-button>-->
+            <span class="title">Random Conversation Topic</span>
+            <!--<paper-icon-button icon="refresh"></paper-icon-button>-->
+            <!--<paper-icon-button icon="add">+</paper-icon-button>-->
+        </paper-toolbar>
+
+        <div class="layout vertical">
+            <div class="layout horizontal center center-center">
+                <p>The topic</p>
+            </div>
+            <div class="rct-button-container layout horizontal">
+                <paper-button class="indigo" raised id="pickATopicBtn">Pick A Topic</paper-button>
+            </div>
+
+            <div class="rct-button-container layout horizontal">
+                <paper-button raised>Share</paper-button>
+            </div>
+
+        </div>
+    </template>
+</dom-module>
+<script>
+    Polymer({
+        is: "rct-app",
+        properties: {
+        },
+        ready: function (e) {
+            console.log('rct app ready!');
+        }
+    });
+</script>

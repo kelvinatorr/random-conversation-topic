@@ -115,11 +115,13 @@
                 // select a random number from the length of the topics array
                 this.pickIndex = Math.floor(Math.random() * this.topics.length);
                 document.getElementById('rctTopic').hidden = false;
-                // TODO: run slot machine look
-                // show the pick
-                this.currentIndex = this.pickIndex;
-                pickTopicBtn.disabled = false;
-
+                // run slot machine-ish look
+                var self = this;
+                Promise.all(this._runSlotMachineLook()).then(function() {
+                    // show the pick
+                    self.currentIndex = self.pickIndex;
+                    pickTopicBtn.disabled = false;
+                });
             },
 
             share: function() {
@@ -127,14 +129,44 @@
             },
 
             dataChanged: function() {
-                if(this.topics.length === 2) {
+                if(this.topics.length > 0) {
                     document.getElementById('pickATopicBtn').disabled = false;
                     document.getElementById('shareBtn').disabled = false;
                 }
             },
 
             _runSlotMachineLook: function() {
+                var self = this;
+                // randomly select a start index
+                this.currentIndex = Math.floor(Math.random() * this.topics.length);
+                var totalWait = 5000;
+                var wait = 0;
+                var counter = 0;
+                var allTimeouts = [];
+                while (totalWait > wait) {
+                    wait += 50 + (counter * 50);
+                    var promise = this._setTimeoutPromise(function() {
+                        // make it more "random"
+                        var newIndex = Math.floor(Math.random() * self.topics.length);
+                        if(newIndex !==  self.currentIndex) {
+                            self.currentIndex = newIndex;
+                        } else {
+                            self.currentIndex = Math.floor(Math.random() * self.topics.length);
+                        }
+                    }, wait);
+                    allTimeouts.push(promise);
+                    counter += 1;
+                }
+                return allTimeouts;
+            },
 
+            _setTimeoutPromise: function(func, delay) {
+                return new Promise(function(resolve) {
+                    window.setTimeout(function() {
+                        func();
+                        resolve();
+                    }, delay);
+                });
             }
 
         });

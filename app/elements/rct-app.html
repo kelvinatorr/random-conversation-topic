@@ -13,7 +13,7 @@
 
 <dom-module id="rct-app">
     <style is="custom-style" include="iron-flex iron-flex-alignment"></style>
-    <style>
+    <style is="custom-style">
         /* CSS rules for your element */
         .rct-button-container {
             margin: 13px;
@@ -26,16 +26,21 @@
         paper-button.indigo {
             background-color: var(--paper-indigo-500);
             color: white;
-            /*--paper-button-raised-keyboard-focus: {*/
-            /*background-color: var(--paper-pink-a200) !important;*/
-            /*color: white !important;*/
-            /*};*/
         }
 
-        paper-button:focus {
-            background-color: default;
-            color: default;
-            font-weight: normal;;
+        /*paper-button:focus {*/
+            /*background-color: default;*/
+            /*color: default;*/
+            /*font-weight: normal;;*/
+        /*}*/
+
+        paper-button {
+            --paper-button-raised-keyboard-focus: {
+                background-color: default;
+                color: default;
+                font-weight: normal;
+                box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);;
+            }
         }
     </style>
     <template>
@@ -52,23 +57,33 @@
                 <p>The topic</p>
             </div>
             <div class="rct-button-container layout horizontal">
-                <paper-button class="indigo" raised id="pickATopicBtn">Pick A Topic</paper-button>
+                <paper-button class="indigo" raised id="pickATopicBtn" on-tap="pickATopic">Pick A Topic</paper-button>
             </div>
 
             <div class="rct-button-container layout horizontal">
-                <paper-button raised>Share</paper-button>
+                <paper-button raised on-tap="share">Share</paper-button>
             </div>
 
         </div>
     </template>
+    <script>
+        Polymer({
+            is: "rct-app",
+            properties: {
+                //tapTest: tapTest
+            },
+            ready: function (e) {
+//                console.log('rct app ready!');
+            },
+
+            pickATopic: function() {
+                console.log('picking a topic!');
+            },
+
+            share: function() {
+                console.log('generating share token');
+            }
+
+        });
+    </script>
 </dom-module>
-<script>
-    Polymer({
-        is: "rct-app",
-        properties: {
-        },
-        ready: function (e) {
-            console.log('rct app ready!');
-        }
-    });
-</script>

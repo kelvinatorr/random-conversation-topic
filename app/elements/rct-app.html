@@ -30,6 +30,11 @@
             color: white;
         }
 
+        paper-button.indigo[disabled] {
+            background: #eaeaea;
+            color: #a8a8a8
+        }
+
         /*paper-button:focus {*/
             /*background-color: default;*/
             /*color: default;*/
@@ -52,22 +57,19 @@
     <template>
         <!-- local DOM for your element -->
         <paper-toolbar>
-            <!--<paper-icon-button icon="menu"></paper-icon-button>-->
             <span class="title">Random Conversation Topic</span>
-            <!--<paper-icon-button icon="refresh"></paper-icon-button>-->
-            <!--<paper-icon-button icon="add">+</paper-icon-button>-->
         </paper-toolbar>
 
         <div class="layout vertical">
-            <div class="layout horizontal center center-center">
-                <p>{{visibleTopic}}</p>
+            <div class="layout horizontal center center-center" id="topicWrapperDiv">
+                <p id="rctTopic" hidden>{{visibleTopic}}</p>
             </div>
             <div class="rct-button-container layout horizontal">
-                <paper-button class="indigo" raised id="pickATopicBtn" on-tap="pickATopic">Pick A Topic</paper-button>
+                <paper-button class="indigo" raised id="pickATopicBtn" on-tap="pickATopic" disabled>Pick A Topic</paper-button>
             </div>
 
             <div class="rct-button-container layout horizontal">
-                <paper-button raised on-tap="share">Share</paper-button>
+                <paper-button raised id="shareBtn" on-tap="share" disabled>Share</paper-button>
             </div>
 
         </div>
@@ -79,27 +81,45 @@
                 path="/topics"
                 data="{{topics}}">
         </firebase-document>
+        <firebase-document
+                path="/topics/{{currentIndex}}"
+                data="{{visibleTopic}}">
+        </firebase-document>
     </template>
     <script>
         Polymer({
             is: "rct-app",
             properties: {
-                //tapTest: tapTest
                 topics: {
                     type: Array,
                     observer: 'dataChanged'
                 },
                 visibleTopic: {
                     type: String
+                },
+                currentIndex: {
+                    type: Number
+                },
+                pickIndex: {
+                    type: Number
                 }
             },
             ready: function (e) {
-//                console.log('rct app ready!');
             },
 
             pickATopic: function() {
                 console.log('picking a topic!');
-                this.visibleTopic = this.topics[0];
+                // disable the pick button
+                var pickTopicBtn = document.getElementById('pickATopicBtn');
+                pickTopicBtn.disabled = true;
+                // select a random number from the length of the topics array
+                this.pickIndex = Math.floor(Math.random() * this.topics.length);
+                document.getElementById('rctTopic').hidden = false;
+                // TODO: run slot machine look
+                // show the pick
+                this.currentIndex = this.pickIndex;
+                pickTopicBtn.disabled = false;
+
             },
 
             share: function() {
@@ -107,7 +127,14 @@
             },
 
             dataChanged: function() {
-                console.log('data changed', this.topics);
+                if(this.topics.length === 2) {
+                    document.getElementById('pickATopicBtn').disabled = false;
+                    document.getElementById('shareBtn').disabled = false;
+                }
+            },
+
+            _runSlotMachineLook: function() {
+
             }
 
         });

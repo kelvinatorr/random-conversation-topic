@@ -9,6 +9,8 @@
     <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
     <link rel="import" href="../bower_components/paper-button/paper-button.html">
     <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+    <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+    <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 </head>
 
 <dom-module id="rct-app">
@@ -42,6 +44,10 @@
                 box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);;
             }
         }
+
+        p {
+            font-family: 'Roboto', 'Noto', 'sans-serif';
+        }
     </style>
     <template>
         <!-- local DOM for your element -->
@@ -54,7 +60,7 @@
 
         <div class="layout vertical">
             <div class="layout horizontal center center-center">
-                <p>The topic</p>
+                <p>{{visibleTopic}}</p>
             </div>
             <div class="rct-button-container layout horizontal">
                 <paper-button class="indigo" raised id="pickATopicBtn" on-tap="pickATopic">Pick A Topic</paper-button>
@@ -65,12 +71,27 @@
             </div>
 
         </div>
+        <firebase-app auth-domain="random-conversation-topic.firebaseapp.com"
+                      database-url="https://random-conversation-topic.firebaseio.com"
+                      api-key="AIzaSyClduzlz0MPdn4e6jVnMX6M2iAwa8e96MA">
+        </firebase-app>
+        <firebase-document
+                path="/topics"
+                data="{{topics}}">
+        </firebase-document>
     </template>
     <script>
         Polymer({
             is: "rct-app",
             properties: {
                 //tapTest: tapTest
+                topics: {
+                    type: Array,
+                    observer: 'dataChanged'
+                },
+                visibleTopic: {
+                    type: String
+                }
             },
             ready: function (e) {
 //                console.log('rct app ready!');
@@ -78,10 +99,15 @@
 
             pickATopic: function() {
                 console.log('picking a topic!');
+                this.visibleTopic = this.topics[0];
             },
 
             share: function() {
                 console.log('generating share token');
+            },
+
+            dataChanged: function() {
+                console.log('data changed', this.topics);
             }
 
         });

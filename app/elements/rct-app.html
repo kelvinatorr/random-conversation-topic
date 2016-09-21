@@ -17,11 +17,11 @@
     <style is="custom-style" include="iron-flex iron-flex-alignment"></style>
     <style is="custom-style">
         /* CSS rules for your element */
-        .rct-button-container {
+        .rct-container {
             margin: 13px;
         }
 
-        .rct-button-container> paper-button{
+        .rct-container> paper-button{
             width: 100%;
         }
 
@@ -53,6 +53,15 @@
         p {
             font-family: 'Roboto', 'Noto', 'sans-serif';
         }
+
+        #rctTopic {
+            font-size: 2em;
+            margin: 0 0.29em;
+        }
+
+        #rctTopic.done {
+            font-size: 2.5em;
+        }
     </style>
     <template>
         <!-- local DOM for your element -->
@@ -61,14 +70,14 @@
         </paper-toolbar>
 
         <div class="layout vertical">
-            <div class="layout horizontal center center-center" id="topicWrapperDiv">
+            <div class="rct-container layout horizontal center center-center" id="topicWrapperDiv">
                 <p id="rctTopic" hidden>{{visibleTopic}}</p>
             </div>
-            <div class="rct-button-container layout horizontal">
+            <div class="rct-container layout horizontal">
                 <paper-button class="indigo" raised id="pickATopicBtn" on-tap="pickATopic" disabled>Pick A Topic</paper-button>
             </div>
 
-            <div class="rct-button-container layout horizontal">
+            <div class="rct-container layout horizontal">
                 <paper-button raised id="shareBtn" on-tap="share" disabled>Share</paper-button>
             </div>
 
@@ -114,13 +123,16 @@
                 pickTopicBtn.disabled = true;
                 // select a random number from the length of the topics array
                 this.pickIndex = Math.floor(Math.random() * this.topics.length);
-                document.getElementById('rctTopic').hidden = false;
+                var rctTopic = document.getElementById('rctTopic');
+                rctTopic.hidden = false;
+                rctTopic.classList.remove('done');
                 // run slot machine-ish look
                 var self = this;
                 Promise.all(this._runSlotMachineLook()).then(function() {
                     // show the pick
                     self.currentIndex = self.pickIndex;
                     pickTopicBtn.disabled = false;
+                    rctTopic.classList.add('done');
                 });
             },
 

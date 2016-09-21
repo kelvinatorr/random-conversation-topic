@@ -17,6 +17,7 @@
     <style is="custom-style" include="iron-flex iron-flex-alignment"></style>
     <style is="custom-style">
         /* CSS rules for your element */
+
         .rct-container {
             margin: 13px;
         }
@@ -25,8 +26,12 @@
             width: 100%;
         }
 
+        paper-toolbar {
+            background-color: var(--paper-deep-purple-500);
+        }
+
         paper-button.indigo {
-            background-color: var(--paper-indigo-500);
+            background-color: var(--paper-deep-purple-500);
             color: white;
         }
 
@@ -77,7 +82,7 @@
                 <paper-button class="indigo" raised id="pickATopicBtn" on-tap="pickATopic" disabled>Pick A Topic</paper-button>
             </div>
 
-            <div class="rct-container layout horizontal">
+            <div class="rct-container layout vertical">
                 <paper-button raised id="shareBtn" on-tap="share" disabled>Share</paper-button>
             </div>
 
@@ -86,13 +91,11 @@
                       database-url="https://random-conversation-topic.firebaseio.com"
                       api-key="AIzaSyClduzlz0MPdn4e6jVnMX6M2iAwa8e96MA">
         </firebase-app>
-        <firebase-document
-                path="/topics"
-                data="{{topics}}">
+
+        <firebase-document path="/topics" data="{{topics}}">
         </firebase-document>
-        <firebase-document
-                path="/topics/{{currentIndex}}"
-                data="{{visibleTopic}}">
+
+        <firebase-document id="firebaseShares" path="/shares" data="{{currentIndex}}" disabled>
         </firebase-document>
     </template>
     <script>
@@ -101,23 +104,21 @@
             properties: {
                 topics: {
                     type: Array,
-                    observer: 'dataChanged'
+                    observer: 'topicsChanged'
                 },
                 visibleTopic: {
                     type: String
                 },
                 currentIndex: {
-                    type: Number
+                    type: Number,
+                    observer: 'currentIndexChanged'
                 },
                 pickIndex: {
                     type: Number
                 }
             },
-            ready: function (e) {
-            },
 
             pickATopic: function() {
-                console.log('picking a topic!');
                 // disable the pick button
                 var pickTopicBtn = document.getElementById('pickATopicBtn');
                 pickTopicBtn.disabled = true;
@@ -137,13 +138,40 @@
             },
 
             share: function() {
+                var self = this;
                 console.log('generating share token');
+                var firebaseShares = document.getElementById('firebaseShares');
+                firebaseShares.disabled = false;
+                var newSharesKey = firebaseShares.ref.push().key;
+                console.log(newSharesKey);
+                firebaseShares.ref.child(newSharesKey).set(this.currentIndex).then(function() {
+                    firebaseShares.path = '/shares/' + newSharesKey;
+                    firebaseShares.data = self.currentIndex;
+                });
             },
 
-            dataChanged: function() {
+            currentIndexChanged: function() {
+                if(Number.isInteger(this.currentIndex) && this.topics.length > 0) {
+                    this.visibleTopic = this.topics[this.currentIndex];
+                }
+            },
+
+            topicsChanged: function() {
                 if(this.topics.length > 0) {
+                    // topics ready
                     document.getElementById('pickATopicBtn').disabled = false;
                     document.getElementById('shareBtn').disabled = false;
+                    if(!Number.isInteger(this.currentIndex)) {
+                        this.currentIndex = Math.floor(Math.random() * this.topics.length);
+                    }
+                    this.visibleTopic = this.topics[this.currentIndex];
+                    // show the topic
+                    var rctTopic = document.getElementById('rctTopic');
+                    rctTopic.hidden = false;
+                    rctTopic.classList.add('done');
+                } else {
+                    document.getElementById('pickATopicBtn').disabled = true;
+                    document.getElementById('shareBtn').disabled = true;
                 }
             },
 

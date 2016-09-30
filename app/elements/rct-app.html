@@ -11,6 +11,7 @@
     <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
     <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
     <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+    <link rel="import" href="../bower_components/google-url-shortener/google-url-shortener.html">
 </head>
 
 <dom-module id="rct-app">
@@ -67,6 +68,14 @@
         #rctTopic.done {
             font-size: 2.5em;
         }
+
+        #shareUrl {
+            font-size: 1.5em;
+        }
+
+        #shareMessage {
+            margin-top: 0;
+        }
     </style>
     <template>
         <!-- local DOM for your element -->
@@ -82,8 +91,16 @@
                 <paper-button class="indigo" raised id="pickATopicBtn" on-tap="pickATopic" disabled>Pick A Topic</paper-button>
             </div>
 
-            <div class="rct-container layout vertical">
+            <div class="rct-container layout horizontal">
                 <paper-button raised id="shareBtn" on-tap="share" disabled>Share</paper-button>
+            </div>
+
+            <div class="rct-container layout horizontal center center-center">
+                <p id="shareUrl" hidden>An error occurred, sorry</p>
+            </div>
+
+            <div class="rct-container layout horizontal center center-center">
+                <p id="shareMessage" hidden>Send the url above to your friend</p>
             </div>
 
         </div>
@@ -97,118 +114,185 @@
 
         <firebase-document id="firebaseShares" path="/shares" data="{{currentIndex}}" disabled>
         </firebase-document>
+
+        <!--<google-client-loader id="urlshortener" name="urlshortener" version="v1"-->
+                              <!--on-google-api-load="_readyForAction"-->
+                              <!--on-google-api-load-error="_apiLoadError">-->
+        <!--</google-client-loader>-->
+
+        <google-url-shortener id="shortener">
+        </google-url-shortener>
     </template>
     <script>
-        Polymer({
-            is: "rct-app",
-            properties: {
-                topics: {
-                    type: Array,
-                    observer: 'topicsChanged'
-                },
-                visibleTopic: {
-                    type: String
-                },
-                currentIndex: {
-                    type: Number,
-                    observer: 'currentIndexChanged'
-                },
-                pickIndex: {
-                    type: Number
-                }
-            },
-
-            pickATopic: function() {
-                // disable the pick button
-                var pickTopicBtn = document.getElementById('pickATopicBtn');
-                pickTopicBtn.disabled = true;
-                // select a random number from the length of the topics array
-                this.pickIndex = Math.floor(Math.random() * this.topics.length);
-                var rctTopic = document.getElementById('rctTopic');
-                rctTopic.hidden = false;
-                rctTopic.classList.remove('done');
-                // run slot machine-ish look
-                var self = this;
-                Promise.all(this._runSlotMachineLook()).then(function() {
-                    // show the pick
-                    self.currentIndex = self.pickIndex;
-                    pickTopicBtn.disabled = false;
-                    rctTopic.classList.add('done');
-                });
-            },
-
-            share: function() {
-                var self = this;
-                console.log('generating share token');
-                var firebaseShares = document.getElementById('firebaseShares');
-                firebaseShares.disabled = false;
-                var newSharesKey = firebaseShares.ref.push().key;
-                console.log(newSharesKey);
-                firebaseShares.ref.child(newSharesKey).set(this.currentIndex).then(function() {
-                    firebaseShares.path = '/shares/' + newSharesKey;
-                    firebaseShares.data = self.currentIndex;
-                });
-            },
-
-            currentIndexChanged: function() {
-                if(Number.isInteger(this.currentIndex) && this.topics.length > 0) {
-                    this.visibleTopic = this.topics[this.currentIndex];
-                }
-            },
-
-            topicsChanged: function() {
-                if(this.topics.length > 0) {
-                    // topics ready
-                    document.getElementById('pickATopicBtn').disabled = false;
-                    document.getElementById('shareBtn').disabled = false;
-                    if(!Number.isInteger(this.currentIndex)) {
-                        this.currentIndex = Math.floor(Math.random() * this.topics.length);
+        (function() {
+            var urlShortenerReady;
+            Polymer({
+                is: "rct-app",
+                properties: {
+                    topics: {
+                        type: Array,
+                        observer: 'topicsChanged'
+                    },
+                    visibleTopic: {
+                        type: String
+                    },
+                    currentIndex: {
+                        type: Number,
+                        observer: 'currentIndexChanged'
+                    },
+                    pickIndex: {
+                        type: Number
                     }
-                    this.visibleTopic = this.topics[this.currentIndex];
-                    // show the topic
+                },
+
+                ready: function() {
+                    var shortener = document.getElementById('shortener');
+
+                    shortener.addEventListener('google-api-load', function() {
+                        gapi.client.setApiKey('AIzaSyClduzlz0MPdn4e6jVnMX6M2iAwa8e96MA');
+                    });
+
+                    urlShortenerReady =  new Promise(function(resolve) {
+                        shortener.addEventListener('google-url-shortener-ready', resolve);
+                    });
+
+                },
+
+//            _readyForAction: function() {
+//                console.log('ready for action');
+//                console.log(this.$.urlshortener.api.url);
+//                var request = this.$.urlshortener.api.url.insert(
+//                        {resource: {longUrl: 'http://www.vanityfair.com/news/2016/09/barack-obama-doris-kearns-goodwin-interview'}, key: 'AIzaSyClduzlz0MPdn4e6jVnMX6M2iAwa8e96MA'});
+////                request.key =
+//                request.execute(function(response) {
+//                    if (response && response.id) {
+////                        this.shortUrl = response.id;
+//                        console.log('Success ', response.id);
+//
+////                        this.fire('google-url-shorten', {shortUrl: response.id});
+//                    } else {
+//                        var error = response && response.error ? response.error.message : 'Unknown error';
+//                        console.log(error)
+//                    }
+//                }.bind(this));
+//            },
+
+
+                pickATopic: function() {
+                    // disable the pick button
+                    var pickTopicBtn = document.getElementById('pickATopicBtn');
+                    pickTopicBtn.disabled = true;
+                    // select a random number from the length of the topics array
+                    this.pickIndex = Math.floor(Math.random() * this.topics.length);
                     var rctTopic = document.getElementById('rctTopic');
                     rctTopic.hidden = false;
-                    rctTopic.classList.add('done');
-                } else {
-                    document.getElementById('pickATopicBtn').disabled = true;
-                    document.getElementById('shareBtn').disabled = true;
-                }
-            },
+                    rctTopic.classList.remove('done');
+                    // run slot machine-ish look
+                    var self = this;
+                    Promise.all(this._runSlotMachineLook()).then(function() {
+                        // show the pick
+                        self.currentIndex = self.pickIndex;
+                        pickTopicBtn.disabled = false;
+                        rctTopic.classList.add('done');
+                    });
+                },
 
-            _runSlotMachineLook: function() {
-                var self = this;
-                // randomly select a start index
-                this.currentIndex = Math.floor(Math.random() * this.topics.length);
-                var totalWait = 5000;
-                var wait = 0;
-                var counter = 0;
-                var allTimeouts = [];
-                while (totalWait > wait) {
-                    wait += 50 + (counter * 50);
-                    var promise = this._setTimeoutPromise(function() {
-                        // make it more "random"
-                        var newIndex = Math.floor(Math.random() * self.topics.length);
-                        if(newIndex !==  self.currentIndex) {
-                            self.currentIndex = newIndex;
-                        } else {
-                            self.currentIndex = Math.floor(Math.random() * self.topics.length);
+                share: function() {
+                    var self = this;
+                    console.log('generating share token');
+                    var firebaseShares = document.getElementById('firebaseShares');
+                    firebaseShares.disabled = false;
+                    var newSharesKey = firebaseShares.ref.push().key;
+                    console.log(newSharesKey);
+                    firebaseShares.ref.child(newSharesKey).set(this.currentIndex).then(function() {
+                        firebaseShares.path = '/shares/' + newSharesKey;
+                        firebaseShares.data = self.currentIndex;
+                    });
+                    urlShortenerReady.then(function() {
+                        console.log('url shortener ready!!');
+                        var shortener = document.getElementById('shortener');
+                        shortener.addEventListener('google-url-shorten', function() {
+                            // show the shortened url
+                            console.log(shortener.shortUrl);
+                            var shareUrl = document.getElementById('shareUrl');
+                            shareUrl.innerHTML = shortener.shortUrl;
+                            shareUrl.hidden = false;
+                            var shareMessage = document.getElementById('shareMessage');
+                            shareMessage.hidden = false;
+                        });
+                        shortener.addEventListener('google-url-shorten-error', function() {
+                           // show error message
+                            console.log(shortener.error);
+                            var shareMessage = document.getElementById('shareMessage');
+                            shareMessage.innerHTML = shortener.error;
+                            shareMessage.hidden = false;
+                        });
+                        shortener.longUrl =  '//' + window.location.host + '/#' + newSharesKey;
+                        shortener.shorten();
+                    });
+                },
+
+                currentIndexChanged: function() {
+                    if(Number.isInteger(this.currentIndex) && this.topics.length > 0) {
+                        this.visibleTopic = this.topics[this.currentIndex];
+                    }
+                },
+
+                topicsChanged: function() {
+                    if(this.topics.length > 0) {
+                        // topics ready
+                        document.getElementById('pickATopicBtn').disabled = false;
+                        document.getElementById('shareBtn').disabled = false;
+                        if(!Number.isInteger(this.currentIndex)) {
+                            this.currentIndex = Math.floor(Math.random() * this.topics.length);
                         }
-                    }, wait);
-                    allTimeouts.push(promise);
-                    counter += 1;
+                        this.visibleTopic = this.topics[this.currentIndex];
+                        // show the topic
+                        var rctTopic = document.getElementById('rctTopic');
+                        rctTopic.hidden = false;
+                        rctTopic.classList.add('done');
+                    } else {
+                        document.getElementById('pickATopicBtn').disabled = true;
+                        document.getElementById('shareBtn').disabled = true;
+                    }
+                },
+
+                _runSlotMachineLook: function() {
+                    var self = this;
+                    // randomly select a start index
+                    this.currentIndex = Math.floor(Math.random() * this.topics.length);
+                    var totalWait = 5000;
+                    var wait = 0;
+                    var counter = 0;
+                    var allTimeouts = [];
+                    while (totalWait > wait) {
+                        wait += 50 + (counter * 50);
+                        var promise = this._setTimeoutPromise(function() {
+                            // make it more "random"
+                            var newIndex = Math.floor(Math.random() * self.topics.length);
+                            if(newIndex !==  self.currentIndex) {
+                                self.currentIndex = newIndex;
+                            } else {
+                                self.currentIndex = Math.floor(Math.random() * self.topics.length);
+                            }
+                        }, wait);
+                        allTimeouts.push(promise);
+                        counter += 1;
+                    }
+                    return allTimeouts;
+                },
+
+                _setTimeoutPromise: function(func, delay) {
+                    return new Promise(function(resolve) {
+                        window.setTimeout(function() {
+                            func();
+                            resolve();
+                        }, delay);
+                    });
                 }
-                return allTimeouts;
-            },
 
-            _setTimeoutPromise: function(func, delay) {
-                return new Promise(function(resolve) {
-                    window.setTimeout(function() {
-                        func();
-                        resolve();
-                    }, delay);
-                });
-            }
+            });
+        })();
 
-        });
     </script>
 </dom-module>

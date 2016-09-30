@@ -209,11 +209,9 @@
                         firebaseShares.data = self.currentIndex;
                     });
                     urlShortenerReady.then(function() {
-                        console.log('url shortener ready!!');
                         var shortener = document.getElementById('shortener');
                         shortener.addEventListener('google-url-shorten', function() {
                             // show the shortened url
-                            console.log(shortener.shortUrl);
                             var shareUrl = document.getElementById('shareUrl');
                             shareUrl.innerHTML = shortener.shortUrl;
                             shareUrl.hidden = false;
@@ -222,7 +220,6 @@
                         });
                         shortener.addEventListener('google-url-shorten-error', function() {
                            // show error message
-                            console.log(shortener.error);
                             var shareMessage = document.getElementById('shareMessage');
                             shareMessage.innerHTML = shortener.error;
                             shareMessage.hidden = false;
@@ -230,6 +227,7 @@
                         shortener.longUrl =  '//' + window.location.host + '/#' + newSharesKey;
                         shortener.shorten();
                     });
+                    document.getElementById('shareBtn').disabled = true;
                 },
 
                 currentIndexChanged: function() {

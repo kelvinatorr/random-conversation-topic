@@ -142,11 +142,17 @@
                     },
                     pickIndex: {
                         type: Number
+                    },
+                    _shared: {
+                        type: Boolean,
+                        value: false
                     }
                 },
 
                 ready: function() {
                     var shortener = document.getElementById('shortener');
+
+                    var self = this;
 
                     shortener.addEventListener('google-api-load', function() {
                         gapi.client.setApiKey('AIzaSyClduzlz0MPdn4e6jVnMX6M2iAwa8e96MA');
@@ -154,6 +160,14 @@
 
                     urlShortenerReady =  new Promise(function(resolve) {
                         shortener.addEventListener('google-url-shortener-ready', resolve);
+                    });
+
+                    // check if the location hash has a valid share key
+                    if(location.hash) {
+                        this._checkHash();
+                    }
+                    window.addEventListener('hashchange', function() {
+                        self._checkHash();
                     });
 
                 },
@@ -228,6 +242,7 @@
                         shortener.shorten();
                     });
                     document.getElementById('shareBtn').disabled = true;
+                    this._shared = true;
                 },
 
                 currentIndexChanged: function() {
@@ -240,7 +255,7 @@
                     if(this.topics.length > 0) {
                         // topics ready
                         document.getElementById('pickATopicBtn').disabled = false;
-                        document.getElementById('shareBtn').disabled = false;
+                        document.getElementById('shareBtn').disabled = this._shared;
                         if(!Number.isInteger(this.currentIndex)) {
                             this.currentIndex = Math.floor(Math.random() * this.topics.length);
                         }
@@ -286,6 +301,21 @@
                             func();
                             resolve();
                         }, delay);
+                    });
+                },
+
+                _checkHash: function() {
+                    var self = this;
+                    firebase.database().ref('shares/' + location.hash.substring(1)).once('value').then(function(data) {
+                        var index = data.val();
+                        if(index && Number.isInteger(index) && index > 0) {
+                            self.currentIndex = index;
+                            document.getElementById('shareBtn').disabled = true;
+                            self.shared = true;
+                        } else {
+                            document.getElementById('shareBtn').disabled = false;
+                            self.shared = false;
+                        }
                     });
                 }
 

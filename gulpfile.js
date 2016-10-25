@@ -44,7 +44,13 @@ gulp.task('copy-files', function() {
         .pipe(minifyCss())
         .pipe(gulp.dest('dist/styles'));
 
-    return merge(css);
+    var manifest = gulp.src('app/manifest.json')
+        .pipe(gulp.dest('dist'));
+
+    var imgs = gulp.src('app/imgs/*')
+        .pipe(gulp.dest('dist/imgs'));
+
+    return merge(css, manifest, imgs);
 });
 
 gulp.task('vulcanize', function () {

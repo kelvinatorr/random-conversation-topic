@@ -310,11 +310,14 @@
                         var index = data.val();
                         if(index && Number.isInteger(index) && index > 0) {
                             self.currentIndex = index;
+                            var firebaseShares = document.getElementById('firebaseShares');
+                            firebaseShares.disabled = false;
+                            firebaseShares.path = '/shares/' + location.hash.substring(1);
                             document.getElementById('shareBtn').disabled = true;
-                            self.shared = true;
+                            self._shared = true;
                         } else {
                             document.getElementById('shareBtn').disabled = false;
-                            self.shared = false;
+                            self._shared = false;
                         }
                     });
                 }

@@ -27,17 +27,10 @@
                           clients-claim
                           auto-register
                           reload-on-install
+                          href="service-worker.js"
                           id="platinumSWRegister">
         <platinum-sw-cache default-cache-strategy="fastest"></platinum-sw-cache>
     </platinum-sw-register>
     <rct-app></rct-app>
-    <button onclick="test()">Test State</button>
-    <script>
-        (function(global) {
-            global.test = function() {
-                console.log(document.getElementById('platinumSWRegister').state);
-            }
-        })(this);
-    </script>
 </body>
 </html>

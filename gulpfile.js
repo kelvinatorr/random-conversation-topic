@@ -47,6 +47,16 @@ gulp.task('copy-files', function() {
     //var css = gulp.src(cssFiles)
     //    .pipe(minifyCss())
     //    .pipe(gulp.dest('dist/styles'));
+    var swBootstrap = gulp.src('app/bower_components/platinum-sw/bootstrap/*.js')
+        .pipe(uglify())
+        .pipe(gulp.dest('dist/bootstrap'));
+
+    var swToolbox = gulp.src('app/bower_components/sw-toolbox/*.{js,map}')
+        .pipe(gulp.dest('dist/sw-toolbox'));
+
+
+    var sw = gulp.src('app/bower_components/platinum-sw/service-worker.js')
+        .pipe(gulp.dest('dist'));
 
     var manifest = gulp.src('app/manifest.json')
         .pipe(gulp.dest('dist'));
@@ -54,7 +64,7 @@ gulp.task('copy-files', function() {
     var imgs = gulp.src('app/imgs/*')
         .pipe(gulp.dest('dist/imgs'));
 
-    return merge(manifest, imgs);
+    return merge(swBootstrap, swToolbox, sw, manifest, imgs);
 });
 
 gulp.task('vulcanize', function () {

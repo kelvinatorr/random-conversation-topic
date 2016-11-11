@@ -9,7 +9,7 @@
     <link rel="icon" sizes="192x192" href="imgs/icon-192.png">
     <link rel="manifest" href="manifest.json">
     <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
-
+    <link rel="import" href="bower_components/platinum-sw/platinum-sw-elements.html">
     <link rel="import" href="elements/rct-app.html">
     <style is="custom-style">
 
@@ -23,6 +23,21 @@
 
 </head>
 <body unresolved>
+    <platinum-sw-register skip-waiting
+                          clients-claim
+                          auto-register
+                          reload-on-install
+                          id="platinumSWRegister">
+        <platinum-sw-cache default-cache-strategy="fastest"></platinum-sw-cache>
+    </platinum-sw-register>
     <rct-app></rct-app>
+    <button onclick="test()">Test State</button>
+    <script>
+        (function(global) {
+            global.test = function() {
+                console.log(document.getElementById('platinumSWRegister').state);
+            }
+        })(this);
+    </script>
 </body>
 </html>

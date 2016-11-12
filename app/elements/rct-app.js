@@ -38,7 +38,11 @@
             });
 
             urlShortenerReady =  new Promise(function(resolve) {
-                shortener.addEventListener('google-url-shortener-ready', resolve);
+                shortener.addEventListener('google-url-shortener-ready', function() {
+                    // unhide the shortener button
+                    document.getElementById('shareBtn').hidden = false;
+                    resolve();
+                });
             });
 
             // check if the location hash has a valid share key

@@ -53,6 +53,13 @@
                 self._checkHash();
             });
 
+            console.log('Browser is ', document.getElementById('firebaseTopics').online);
+            // TODO:
+            // detect if browser is offline
+                // get topics from cache
+            // if online
+                // cache data
+
         },
 
 //            _readyForAction: function() {

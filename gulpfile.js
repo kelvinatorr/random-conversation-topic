@@ -12,6 +12,10 @@ var merge = require('merge-stream');
 var runSequence = require('run-sequence');
 var minifyInline = require('gulp-minify-inline');
 var htmlmin = require('gulp-htmlmin');
+var packageJson = require('./package.json');
+var $ = require('gulp-load-plugins')();
+var path = require('path');
+
 
 // delete everything in the www folder
 gulp.task('clean-dist', function () {
@@ -38,11 +42,21 @@ gulp.task('uglifyInlineJS', function() {
 gulp.task('copy-files', function() {
 
     // copy over css files
-    var cssFiles = ['app/styles/main.css'];
+    //var cssFiles = ['app/styles/main.css'];
+    //
+    //var css = gulp.src(cssFiles)
+    //    .pipe(minifyCss())
+    //    .pipe(gulp.dest('dist/styles'));
+    var swBootstrap = gulp.src('app/bower_components/platinum-sw/bootstrap/*.js')
+        .pipe(uglify())
+        .pipe(gulp.dest('dist/bootstrap'));
 
-    var css = gulp.src(cssFiles)
-        .pipe(minifyCss())
-        .pipe(gulp.dest('dist/styles'));
+    var swToolbox = gulp.src('app/bower_components/sw-toolbox/*.{js,map}')
+        .pipe(gulp.dest('dist/sw-toolbox'));
+
+
+    var sw = gulp.src('app/bower_components/platinum-sw/service-worker.js')
+        .pipe(gulp.dest('dist'));
 
     var manifest = gulp.src('app/manifest.json')
         .pipe(gulp.dest('dist'));
@@ -50,7 +64,7 @@ gulp.task('copy-files', function() {
     var imgs = gulp.src('app/imgs/*')
         .pipe(gulp.dest('dist/imgs'));
 
-    return merge(css, manifest, imgs);
+    return merge(swBootstrap, swToolbox, sw, manifest, imgs);
 });
 
 gulp.task('vulcanize', function () {

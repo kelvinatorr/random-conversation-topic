@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "http-server ./app",
-    "serve:dist": "gulp build && http-server ./dist",
+    "serve": "http-server ./app -c-1",
+    "serve:dist": "gulp build && http-server ./dist -c-1",
     "build": "gulp build",
     "deploy": "gulp build && firebase deploy"
   },
@@ -17,10 +17,13 @@
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.0",
     "gulp-htmlmin": "^3.0.0",
+    "gulp-load-plugins": "^1.3.0",
     "gulp-minify-css": "^1.2.4",
     "gulp-minify-inline": "^0.2.1",
     "gulp-rename": "^1.2.2",
+    "gulp-rev": "^7.1.2",
     "gulp-uglify": "^2.0.0",
+    "gulp-util": "^3.0.7",
     "gulp-vulcanize": "^6.1.0",
     "merge-stream": "^1.0.0",
     "run-sequence": "^1.2.2"
